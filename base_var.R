@@ -4,7 +4,7 @@ cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 dir_code <- paste(dir_c,dirName,sep='')
 dir_data <- paste(dir_d,dirName,sep='')
 
-if (osFlag){
+if (osFlag == 'Windows'){
   source('D:/Git/R_libs_user/R_custom_lib.R')
 }else{
   source('~/Code/R/R_libs_user/R_custom_lib.R')
