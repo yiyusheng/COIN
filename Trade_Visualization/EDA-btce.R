@@ -1,42 +1,44 @@
-rm(list = ls())
-setwd('~/Code/R/COIN/Trade_Visualization/')
-source('~/rhead')
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+# Filename: load_sqlite.R
+#
+# Description: 
+#
+# Copyright (c) 2017, Yusheng Yi <yiyusheng.hust@gmail.com>
+#
+# Version 1.0
+#
+# Initial created: 2017-05-19 15:24:55
+#
+# Last   modified: 2017-05-19 15:24:56
+#
+#
+#
+rm(list = ls());setwd('~/Code/R/COIN/Trade_Visualization/');source('~/rhead')
+source('plotFunc.R')
+# DT <- load_sqlite()
+load(file.path(dir_data,'sqlData.Rda'))
+DT <- subset(DT,time > as.POSIXct('2017-05-12') & time < as.POSIXct(as.character(as.Date(max(DT$time)))))
+DT <- subset(DT,pair == 'ltc_usd')
 
-DT <- read.csv(file.path(dir_data,'btce.csv'))
-names(DT) <- c('index','pair','type','price','tid','value','time')
+###### MAIN:STATISTIC ######\
+DT$timeD <- getCutInterval(DT$time,interval = 'days')
+DT$timeH <- getCutInterval(DT$time,interval = 'hours')
+DT$timeM <- getCutInterval(DT$time,interval = 'mins')
+# S1. number of trade per interval
+tableTPI <- melt(table(DT$type,DT$pair,DT$timeD))
+names(tableTPI) <- c('type','pair','time','count')
+tableTPI <- subset(tableTPI,count != 0)
+tableTPI$time <- as.Date(tableTPI$time)
 
-###### MAIN ######
-DT <- subsetX(DT,!is.na(index))
-DT$time <- as.POSIXct.numeric(DT$time,origin = '1970-01-01')
+# S2. number of value per interval
+tableVPI <- list2df(tapply(DT$value,DT$timeD,sum),n = c('value','time'))
 
-table_pair_type <- melt(table(DT$type,DT$pair))
-names(table_pair_type) <- c('type','pair','count')
-ggplot(table_pair_type,aes(x = pair,y = count,fill = type)) + geom_bar(stat = 'identity')
+###### MAIN:PLOT ######
+# P1. plot trend of price and bid/ask count
+p1 <- plot_price('ltc_usd')
+p2 <- plot_value('ltc_usd',bw = 3600)
+multiplot(p1,p2,cols = 1)
 
-getCutInterval <- function(t,interval){
-  mint <- round.POSIXt(min(t),'mins') - 60
-  maxt <- round.POSIXt(max(t),'mins') + 60
-  seqt <- seq.POSIXt(mint,maxt,interval)
-  cut.POSIXt(t,seqt,seqt[-length(seqt)])
-}
-
-getCandleStick <- function(interval = 300,gcsPair = 'btc_usd'){
-  gcsDT <- subset(DT,pair == gcsPair)
-  gcsDT$unitT <- as.p(getCutInterval(gcsDT$timestamp,15*60))
-  sta <- by(gcsDT,gcsDT$unitT,function(df){
-    list(df$unitT[1],
-    roundX(mean(df$price)),
-    df$price[1],
-    df$price[nrow(df)],
-    max(df$price),
-    min(df$price),
-    sum(df$amount))
-  })
-  sta <- data.frame(matrix(unlist(sta),byrow = T,nrow = length(sta)))
-  names(sta) <- c('ts','mean','open','close','max','min','amount')
-  sta$ts <- as.POSIXct.numeric(sta$ts,origin = '1970-01-01')
-
-  ggplot(sta,aes(x = ts,group = 1)) + 
-    geom_boxplot(aes(ymin = min, ymax = max, middle = mean, lower = pmin(open,close), upper = pmax(open,close)), stat = 'identity')
-}
+# P2. plot the candleStick plot
 p <- getCandleStick()
