@@ -15,30 +15,36 @@
 #
 #
 rm(list = ls());setwd('~/Code/R/COIN/Trade_Visualization/');source('~/rhead')
+library(Hmisc)
 source('plotFunc.R')
-# DT <- load_sqlite()
+source('edaFunc.R')
+source('logFunc.R')
+# DT <- load_DT()
 load(file.path(dir_data,'sqlData.Rda'))
-DT <- subset(DT,time > as.POSIXct('2017-05-12') & time < as.POSIXct(as.character(as.Date(max(DT$time)))))
-DT <- subset(DT,pair == 'ltc_usd')
+
 
 ###### MAIN:STATISTIC ######\
-DT$timeD <- getCutInterval(DT$time,interval = 'days')
-DT$timeH <- getCutInterval(DT$time,interval = 'hours')
-DT$timeM <- getCutInterval(DT$time,interval = 'mins')
-# S1. number of trade per interval
-tableTPI <- melt(table(DT$type,DT$pair,DT$timeD))
-names(tableTPI) <- c('type','pair','time','count')
-tableTPI <- subset(tableTPI,count != 0)
-tableTPI$time <- as.Date(tableTPI$time)
+# S0. add interval
+DT <- gen_interval(DT)
 
-# S2. number of value per interval
-tableVPI <- list2df(tapply(DT$value,DT$timeD,sum),n = c('value','time'))
+# S1. number of value on certain day/hour/minutes
+aggTOW <- setNames(with(DT,aggregate(value,by = list(pair,type,timePW),sum)),
+                   c('pair','type','time','numValue'))
+aggTOH <- setNames(with(DT,aggregate(value,by = list(pair,type,timePH),sum)),
+                   c('pair','type','time','numValue'))
+aggTOM <- setNames(with(DT,aggregate(value,by = list(pair,type,timePM),sum)),
+                   c('pair','type','time','numValue'))
 
 ###### MAIN:PLOT ######
 # P1. plot trend of price and bid/ask count
 p1 <- plot_price('ltc_usd')
-p2 <- plot_value('ltc_usd',bw = 3600)
-multiplot(p1,p2,cols = 1)
+list[p_trade,p_value] <- plot_value()
+multiplot(p1,p_trade,p_value,cols = 1)
 
 # P2. plot the candleStick plot
 p <- getCandleStick()
+
+# P3. number of value on certain day/hour/minutes
+ggplot(aggTOW,aes(x = time,y = numValue,fill = type)) + geom_bar(stat = 'identity')
+ggplot(aggTOH,aes(x = time,y = numValue,fill = type)) + geom_bar(stat = 'identity')
+ggplot(aggTOM,aes(x = time,y = numValue,fill = type)) + geom_bar(stat = 'identity')

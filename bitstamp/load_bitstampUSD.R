@@ -18,7 +18,7 @@
 rm(list = ls());setwd('~/Code/R/COIN/');source('~/rhead')
 DT <- read.csv(file.path(dir_data,'bitstampUSD.csv'),header = F)
 names(DT) <- c('time','price','value')
-DT$time <- as.POSIXct.numeric(DT$time,tz = 'UTC',origin = '1970-01-01')
+DT$time <- as.POSIXct.numeric(DT$time,origin = '1970-01-01')
 save(DT,file = file.path(dir_data,'bitstampUSD.Rda'))
 
 

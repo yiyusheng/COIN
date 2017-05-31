@@ -35,6 +35,17 @@ plot_num_trade <- function(pa,bw = 3600,from = NULL,to = NULL,DTP = DT){
   p <- ggplot(subset(DTP,pair == pa),aes(x = time)) + geom_histogram(binwidth = bw) + ggtitle(pa)
 }
 
+# P3. plot trend of number of value
+plot_value <- function(){
+  aggTPI <- setNames(with(DT,aggregate(value,by = list(pair,type,timeH),length)),
+                     c('pair','type','time','numTrade'))
+  aggVPI <- setNames(with(DT,aggregate(value,by = list(pair,type,timeH),sum)),
+                     c('pair','type','time','numValue'))
+  p1 <- ggplot(aggTPI,aes(x = time,y = numTrade,fill = type)) + geom_bar(stat = 'identity') + ggtitle('Trade per hour')
+  p2 <- ggplot(aggVPI,aes(x = time,y = numValue,fill = type)) + geom_bar(stat = 'identity') + ggtitle('Value per hour')
+  return(list(p1,p2))
+}
+
 # P3. plot CandleStick
 plot_CandleStick <- function(interval = 300,gcsPair = 'btc_usd'){
   gcsDT <- subset(DT,pair == gcsPair)
