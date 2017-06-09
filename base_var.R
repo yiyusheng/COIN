@@ -17,5 +17,7 @@ require('grid')
 require('ggplot2')
 require('reshape2')
 require('plyr')
-
+require(Hmisc)
+require(quantmod)
+require(TTR)
 

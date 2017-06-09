@@ -16,17 +16,16 @@
 #
 
 rm(list = ls());setwd('~/Code/R/COIN/bitstamp/');source('~/rhead')
-load(file.path(dir_data,'bitstampUSD.Rda'))
-require(Hmisc)
-require(quantmod)
-require(TTR)
+
 
 # S1. data prepare
-DT1 <- DT
-DT <- DT1
-names(DT) <- c('time','price','volume')
-DT <- xts(DT[,c('price','volume')],DT$time)
-save(DT,file = file.path(dir_data,'bitstamp_xts.Rda'))
+# load(file.path(dir_data,'bitstampUSD.Rda'))
+# DT1 <- DT
+# DT <- DT1
+# names(DT) <- c('time','price','volume')
+# DT <- xts(DT[,c('price','volume')],DT$time)
+# save(DT,file = file.path(dir_data,'bitstamp_xts.Rda'))
+load(file.path(dir_data,'bitstamp_xts.Rda'))
 
 # S2. generate OLHC with different period
 DT.1m <- get_xts_period(DT,'minutes',1)
@@ -40,6 +39,8 @@ DT.1w <- get_xts_period(DT,'weeks',1)
 # S3. plot chart
 chartSeries(DT.1h['201703'],up.col='blue',down.col='red',
             TA = "addMACD();addBBands();addVo();addADX();addSMA(n=10)")
-
+chartSeries(DT.1h['2017'],up.col='blue',down.col='red',
+            TA = "addMACD()")
 # S4. technical metrics
 ma_20 <- runMean(DT.1h[,4],n = 20)
+ma_10 <- runMean(DT.1h[,4],n = 10)

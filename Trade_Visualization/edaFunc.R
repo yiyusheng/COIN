@@ -41,7 +41,6 @@ load_DT <- function(){
   DT$create_time <- round_time(DT$create_time)
   # DT <- subset(DT,time > as.POSIXct('2017-05-22 08:00:00',tz = 'UTC') & time < max(round.POSIXt(DT$time,units = 'days')) + 8*3600)
   DT <- DT[order(DT$time),]
-  splitDT <- split(DT,DT$pair)
-  save(DT,splitDT,file = file.path(dir_data,'sqlData.Rda'))
+  save(DT,file = file.path(dir_data,'sqlData.Rda'))
   return(DT)
 }
