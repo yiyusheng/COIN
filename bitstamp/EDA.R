@@ -42,5 +42,5 @@ chartSeries(DT.1h['201703'],up.col='blue',down.col='red',
 chartSeries(DT.1h['2017'],up.col='blue',down.col='red',
             TA = "addMACD()")
 # S4. technical metrics
-ma_20 <- runMean(DT.1h[,4],n = 20)
-ma_10 <- runMean(DT.1h[,4],n = 10)
+ma_20 <- runMean(DT.4h[,4],n = 20)
+ma_10 <- runMean(DT.4h[,4],n = 10)
